@@ -25,12 +25,11 @@ namespace Application.Features.Authenticate.Commands.RegisterCommand
 
             RuleFor(p => p.Password)
                 .NotEmpty().WithMessage("La propiedad {PropertyName} no puede estar vacia.")
-                .MinimumLength(5).WithMessage("La propiedad {PropertyName} no puede se menor a {MinLength} caracteres.")
-                .MaximumLength(20).WithMessage("La propiedad {PropertyName} no puede exceder {MaxLength} caracteres.");
+                .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,15}$")
+                    .WithMessage("La propiedad {PropertyName} debe contener entre 8 a 15 caracteres, al menos una letra mayúscula, una letra minúscula, un número y un caracter especial.");
 
             RuleFor(p => p.ConfirmPassword)
                 .NotEmpty().WithMessage("La propiedad {PropertyName} no puede estar vacia.")
-                .MaximumLength(20).WithMessage("La propiedad {PropertyName} no puede exceder {MaxLength} caracteres.")
                 .Equal(p => p.Password).WithMessage("La propiedad {PropertyName} debe ser igual a Password.");
         }
     }

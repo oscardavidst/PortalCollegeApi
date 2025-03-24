@@ -1,8 +1,12 @@
 ﻿using Application.DTOs.Users;
+using Application.Enums;
 using Application.Features.Authenticate.Commands.AuthenticateCommand;
 using Application.Features.Authenticate.Commands.RegisterCommand;
+using Application.Features.Authenticate.Commands.ValidateTokenCommand;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace WebApi.Controllers
 {
@@ -23,7 +27,7 @@ namespace WebApi.Controllers
 
         [HttpPost("register")]
         [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> RegisterStudentAsync(RegisterRequest request)
+        public async Task<IActionResult> RegisterAsync(RegisterRequest request)
         {
             return Ok(await Mediator.Send(new RegisterCommand
             {
@@ -36,6 +40,36 @@ namespace WebApi.Controllers
                 Origin = Request.Headers["origin"],
                 Rol = request.Rol
             }));
+        }
+
+        [HttpPost("registerStudent")]
+        public async Task<IActionResult> RegisterStudentAsync(RegisterRequest request)
+        {
+            return Ok(await Mediator.Send(new RegisterCommand
+            {
+                Name = request.Name,
+                LastName = request.LastName,
+                Email = request.Email,
+                Password = request.Password,
+                ConfirmPassword = request.ConfirmPassword,
+                UserName = request.UserName,
+                Origin = Request.Headers["origin"],
+                Rol = Roles.Student.ToString()
+            }));
+        }
+
+        [HttpPost("validateToken")]
+        public async Task<IActionResult> ValidateTokenAsync(ValidateTokenRequest request)
+        {
+            var validationResult = await Mediator.Send(new ValidateTokenCommand { Token = request.Token });
+
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles // o ReferenceHandler.Preserve
+            };
+
+            return Ok(JsonSerializer.Serialize(validationResult, options));
+            //return Ok(await Mediator.Send(new ValidateTokenCommand { Token = request.Token }));
         }
 
         private string GenerateIpAddress()

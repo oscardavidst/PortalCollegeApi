@@ -1,4 +1,7 @@
 ﻿using Application.DTOs;
+using Application.Features.Courses.Commands.CreateCourseCommand;
+using Application.Features.Professors.Commands.CreateProfessorCommand;
+using Application.Features.Students.Commands.CreateStudentCommand;
 using AutoMapper;
 using Domain.Entities;
 
@@ -15,8 +18,9 @@ namespace Application.Mappings
             #endregion
 
             #region Commands
-            //CreateMap<CreateStudentCommand, Student>();
-            //CreateMap<CreateTeacherCommand, Professor>();
+            CreateMap<CreateStudentCommand, Student>();
+            CreateMap<CreateProfessorCommand, Professor>();
+            CreateMap<CreateCourseCommand, Course>();
             #endregion
         }
     }

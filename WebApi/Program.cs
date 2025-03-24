@@ -1,4 +1,5 @@
 using Application;
+using Application.Exceptions;
 using Identity;
 using Identity.Models;
 using Identity.Seeds;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 try
 {
+    #region Cors configuration
     var MyAllowSpecificOrigins = "MyCors";
     builder.Services.AddCors(options =>
     {
@@ -23,6 +25,7 @@ try
                 .AllowAnyHeader().AllowAnyMethod();
             });
     });
+    #endregion
 
     // Add services to the container.
     builder.Services.AddApplicationLayer(builder.Configuration);
@@ -32,15 +35,14 @@ try
 
     builder.Services.AddControllers();
 
+    #region Swagger configuration
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-
-    // Swagger
     builder.Services.AddSwaggerGen(optionsSwagger =>
     {
         optionsSwagger.SwaggerDoc("v1", new OpenApiInfo
         {
-            Title = "SchoolApi",
+            Title = "PortalCollegeApi",
             Description = "ASP.NET Core Web API para prueba técnica",
             Contact = new OpenApiContact
             {
@@ -60,15 +62,18 @@ try
         optionsSwagger.AddSecurityRequirement(new OpenApiSecurityRequirement
             {{ new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }}, new string [] {} }});
     });
+    #endregion
 
     var app = builder.Build();
 
-    // Identity Auth
+    #region Seeds Roles
     var services = app.Services.CreateAsyncScope();
     var userManager = services.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     await DefaultRoles.SeedAsync(userManager, roleManager);
     await DefaultAdministratorUser.SeedAsync(userManager, roleManager);
+    #endregion
+
     app.UseAuthentication();
 
     // Configure the HTTP request pipeline.
@@ -90,5 +95,5 @@ try
 }
 catch (Exception ex)
 {
-    throw new Exception(ex.ToString());
+    throw new ApiException(ex.ToString());
 }

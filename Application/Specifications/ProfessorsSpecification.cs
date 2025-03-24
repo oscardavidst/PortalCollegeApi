@@ -5,12 +5,13 @@ namespace Application.Specifications
 {
     public class ProfessorsSpecification : Specification<Professor>
     {
-        public ProfessorsSpecification(string fullName)
+        public ProfessorsSpecification(string? name, string? lastName)
         {
-            if (!string.IsNullOrEmpty(fullName))
-                Query
-                    .Search(t => t.Name, "%" + fullName + "%")
-                    .Search(p => p.LastName, "%" + fullName + "%");
+            if (!string.IsNullOrEmpty(name))
+                Query.Search(s => s.Name, "%" + name + "%");
+
+            if (!string.IsNullOrEmpty(lastName))
+                Query.Search(s => s.LastName, "%" + lastName + "%");
         }
     }
 }

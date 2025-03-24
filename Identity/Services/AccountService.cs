@@ -48,7 +48,7 @@ namespace Identity.Services
             }
 
             JwtSecurityToken jwtSercurityToken = await GenerateJWTToken(usuario);
-            AuthenticationResponse response = new AuthenticationResponse()
+            AuthenticationResponse authResponse = new AuthenticationResponse()
             {
                 Id = usuario.Id,
                 JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSercurityToken),
@@ -57,12 +57,12 @@ namespace Identity.Services
             };
 
             var rolesList = await _userManager.GetRolesAsync(usuario).ConfigureAwait(false);
-            response.Roles = rolesList.ToList();
-            response.IsVerified = usuario.EmailConfirmed;
+            authResponse.Roles = rolesList.ToList();
+            authResponse.IsVerified = usuario.EmailConfirmed;
 
             var refreshToken = GenerateRefreshToken(ipAdress);
-            response.RefreshToken = refreshToken.Token;
-            return new Response<AuthenticationResponse>(response, $"Usuario {usuario.UserName} autenticado!");
+            authResponse.RefreshToken = refreshToken.Token;
+            return new Response<AuthenticationResponse>(authResponse, $"Usuario {usuario.UserName} autenticado!");
         }
 
         public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin, Roles rol)
@@ -154,6 +154,43 @@ namespace Identity.Services
             var randomBytes = new byte[40];
             rngCrypoServiceProvider.GetBytes(randomBytes);
             return BitConverter.ToString(randomBytes).Replace("-", "");
+        }
+
+        public async Task<Response<ClaimsPrincipal>> ValidateTokenAsync(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            try
+            {
+                SecurityToken validatedToken;
+                ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out validatedToken);
+                return new Response<ClaimsPrincipal>(principal, "Token válido.");
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                throw new ApiException("El token ha expirado.");
+            }
+            catch (SecurityTokenInvalidSignatureException)
+            {
+                throw new ApiException("La firma del token no es válida.");
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException($"Token inválido: {ex.Message}");
+            }
         }
     }
 }

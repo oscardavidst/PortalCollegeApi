@@ -2,7 +2,7 @@
 {
     public class CourseDto
     {
-        public int Name { get; set; }
-        public Byte Credits { get; set; }
+        public string Name { get; set; }
+        public int Credits { get; set; }
     }
 }
