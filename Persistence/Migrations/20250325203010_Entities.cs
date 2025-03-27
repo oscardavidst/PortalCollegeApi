@@ -173,7 +173,8 @@ namespace Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Students_Credits_StudentId",
                 table: "Students_Credits",
-                column: "StudentId");
+                column: "StudentId",
+                unique: true);
         }
 
         /// <inheritdoc />

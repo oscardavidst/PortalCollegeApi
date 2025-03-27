@@ -12,7 +12,7 @@ using Persistence.Context;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250323062002_Entities")]
+    [Migration("20250325203010_Entities")]
     partial class Entities
     {
         /// <inheritdoc />
@@ -242,7 +242,8 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId")
+                        .IsUnique();
 
                     b.ToTable("Students_Credits", (string)null);
                 });
@@ -292,8 +293,8 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.StudentCredits", b =>
                 {
                     b.HasOne("Domain.Entities.Student", "Student")
-                        .WithMany("StudentsCredits")
-                        .HasForeignKey("StudentId")
+                        .WithOne("StudentCredits")
+                        .HasForeignKey("Domain.Entities.StudentCredits", "StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_StudentCredits_Students");
@@ -317,7 +318,8 @@ namespace Persistence.Migrations
                 {
                     b.Navigation("Enrollments");
 
-                    b.Navigation("StudentsCredits");
+                    b.Navigation("StudentCredits")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

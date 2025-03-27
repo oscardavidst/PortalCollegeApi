@@ -1,16 +1,17 @@
-﻿using Application.Interfaces;
+﻿using Application.DTOs.Users;
+using Application.Interfaces;
 using Application.Wrappers;
 using MediatR;
 using System.Security.Claims;
 
 namespace Application.Features.Authenticate.Commands.ValidateTokenCommand
 {
-    public class ValidateTokenCommand : IRequest<Response<ClaimsPrincipal>>
+    public class ValidateTokenCommand : IRequest<Response<AuthenticationResponse>>
     {
         public string Token { get; set; }
     }
 
-    public class VerifyTokenCommandHandler : IRequestHandler<ValidateTokenCommand, Response<ClaimsPrincipal>>
+    public class VerifyTokenCommandHandler : IRequestHandler<ValidateTokenCommand, Response<AuthenticationResponse>>
     {
         private readonly IAccountService _accountService;
 
@@ -18,7 +19,7 @@ namespace Application.Features.Authenticate.Commands.ValidateTokenCommand
         {
             _accountService = accountService;
         }
-        public async Task<Response<ClaimsPrincipal>> Handle(ValidateTokenCommand request, CancellationToken cancellationToken)
+        public async Task<Response<AuthenticationResponse>> Handle(ValidateTokenCommand request, CancellationToken cancellationToken)
         {
             return await _accountService.ValidateTokenAsync(request.Token);
         }

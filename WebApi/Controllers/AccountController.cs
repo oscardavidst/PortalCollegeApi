@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Application.Features.Students.Commands.CreateStudentCommand;
 
 namespace WebApi.Controllers
 {
@@ -43,9 +45,9 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("registerStudent")]
-        public async Task<IActionResult> RegisterStudentAsync(RegisterRequest request)
+        public async Task<IActionResult> RegisterStudentAsync(RegisterStudentRequest request)
         {
-            return Ok(await Mediator.Send(new RegisterCommand
+            var registeredStudent = Ok(await Mediator.Send(new RegisterCommand
             {
                 Name = request.Name,
                 LastName = request.LastName,
@@ -56,21 +58,23 @@ namespace WebApi.Controllers
                 Origin = Request.Headers["origin"],
                 Rol = Roles.Student.ToString()
             }));
-        }
 
-        [HttpPost("validateToken")]
-        public async Task<IActionResult> ValidateTokenAsync(ValidateTokenRequest request)
-        {
-            var validationResult = await Mediator.Send(new ValidateTokenCommand { Token = request.Token });
-
-            var options = new JsonSerializerOptions
+            if (registeredStudent.StatusCode == StatusCodes.Status200OK)
             {
-                ReferenceHandler = ReferenceHandler.IgnoreCycles // o ReferenceHandler.Preserve
-            };
+                var student = Ok(await Mediator.Send(new CreateStudentCommand()
+                {
+                    Name = request.Name,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                }));
+            }
 
-            return Ok(JsonSerializer.Serialize(validationResult, options));
-            //return Ok(await Mediator.Send(new ValidateTokenCommand { Token = request.Token }));
+            return registeredStudent;
         }
+
+        [HttpGet("validateToken")]
+        public async Task<IActionResult> ValidateTokenAsync([FromQuery] ValidateTokenRequest request) =>
+            Ok(await Mediator.Send(new ValidateTokenCommand { Token = request.Token }));
 
         private string GenerateIpAddress()
         {

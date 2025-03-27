@@ -10,6 +10,6 @@ namespace Domain.Entities
 
         // Navigations
         public ICollection<Enrollment> Enrollments { get; set; }
-        public ICollection<StudentCredits> StudentsCredits { get; set; }
+        public StudentCredits StudentCredits { get; set; }
     }
 }

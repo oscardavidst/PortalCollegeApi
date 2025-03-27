@@ -239,7 +239,8 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("StudentId")
+                        .IsUnique();
 
                     b.ToTable("Students_Credits", (string)null);
                 });
@@ -289,8 +290,8 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.StudentCredits", b =>
                 {
                     b.HasOne("Domain.Entities.Student", "Student")
-                        .WithMany("StudentsCredits")
-                        .HasForeignKey("StudentId")
+                        .WithOne("StudentCredits")
+                        .HasForeignKey("Domain.Entities.StudentCredits", "StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_StudentCredits_Students");
@@ -314,7 +315,8 @@ namespace Persistence.Migrations
                 {
                     b.Navigation("Enrollments");
 
-                    b.Navigation("StudentsCredits");
+                    b.Navigation("StudentCredits")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

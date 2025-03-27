@@ -13,8 +13,8 @@ namespace Persistence.Configurations
 
             // Foreign key for Student
             builder.HasOne(pc => pc.Student)
-                .WithMany(p => p.StudentsCredits)
-                .HasForeignKey(t => t.StudentId)
+                .WithOne(p => p.StudentCredits)
+                .HasForeignKey<StudentCredits>(t => t.StudentId)
                 .IsRequired()
                 .HasConstraintName("FK_StudentCredits_Students");
 

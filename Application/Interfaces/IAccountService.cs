@@ -9,6 +9,6 @@ namespace Application.Interfaces
     {
         Task<Response<AuthenticationResponse>> AuthenticateAsync(AuthenticationRequest request, string ipAdress);
         Task<Response<string>> RegisterAsync(RegisterRequest request, string origin, Roles rol);
-        Task<Response<ClaimsPrincipal>> ValidateTokenAsync(string token);
+        Task<Response<AuthenticationResponse>> ValidateTokenAsync(string token);
     }
 }

@@ -156,7 +156,7 @@ namespace Identity.Services
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
 
-        public async Task<Response<ClaimsPrincipal>> ValidateTokenAsync(string token)
+        public async Task<Response<AuthenticationResponse>> ValidateTokenAsync(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
@@ -177,7 +177,17 @@ namespace Identity.Services
             {
                 SecurityToken validatedToken;
                 ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out validatedToken);
-                return new Response<ClaimsPrincipal>(principal, "Token válido.");
+                var claims = principal.Identities.FirstOrDefault()?.Claims.ToList();
+                AuthenticationResponse authResponse = new AuthenticationResponse()
+                {
+                    Id = claims?.Where(c => c.Type.Contains("uid")).Select(c => c.Value).FirstOrDefault() ?? "",
+                    Email = claims?.Where(c => c.Type.Contains("email")).Select(c => c.Value).FirstOrDefault() ?? "",
+                    UserName = claims?.Where(c => c.Type.Contains("nameidentifier")).Select(c => c.Value).FirstOrDefault() ?? "",
+                    Roles = [claims?.Where(c => c.Type.Contains("role")).Select(c => c.Value).FirstOrDefault() ?? ""],
+                    IsVerified = true,
+                    JWToken = token
+                };
+                return new Response<AuthenticationResponse>(authResponse, "Token válido.");
             }
             catch (SecurityTokenExpiredException)
             {
