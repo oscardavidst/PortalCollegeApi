@@ -1,4 +1,4 @@
-using Application;
+﻿using Application;
 using Application.Exceptions;
 using Identity;
 using Identity.Models;
@@ -8,6 +8,11 @@ using Microsoft.OpenApi.Models;
 using Persistence;
 using Shared;
 using WebApi.Extensions;
+using Amazon.Lambda.AspNetCoreServer.Hosting;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +48,7 @@ try
         optionsSwagger.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "PortalCollegeApi",
-            Description = "ASP.NET Core Web API para prueba t�cnica",
+            Description = "ASP.NET Core Web API para prueba t�cnica",
             Contact = new OpenApiContact
             {
                 Name = "Oscar David Soto Tellez",
@@ -64,7 +69,20 @@ try
     });
     #endregion
 
-    var app = builder.Build();
+    builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
+// Cargar configuración desde AWS Parameter Store en Lambda
+var isLambda = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("LAMBDA_TASK_ROOT"));
+if (isLambda)
+{
+    var awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? "us-east-1";
+    builder.Configuration.AddSystemsManager(
+        "/PortalCollegeApi/",
+        new AWSOptions { Region = RegionEndpoint.GetBySystemName(awsRegion) }
+    );
+}
+
+
+var app = builder.Build();
 
     #region Seeds Roles
     var services = app.Services.CreateAsyncScope();
@@ -84,7 +102,9 @@ try
     }
 
     app.UseCors(MyAllowSpecificOrigins);
-    app.UseHttpsRedirection();
+    // Solo usar HTTPS redirect fuera de Lambda (API Gateway ya maneja TLS)
+    if (Environment.GetEnvironmentVariable("LAMBDA_TASK_ROOT") == null)
+        app.UseHttpsRedirection();
 
     app.UseAuthorization();
     app.UserErrorHandlingMiddleware();

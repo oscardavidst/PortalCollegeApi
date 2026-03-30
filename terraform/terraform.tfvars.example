@@ -1,0 +1,17 @@
+﻿# Copia este archivo como terraform.tfvars y completa los valores reales
+# NUNCA subas terraform.tfvars a git (ya está en .gitignore)
+
+aws_region   = "us-east-1"
+project_name = "portal-college"
+environment  = "production"
+
+# Credenciales de la BD (mínimo 8 caracteres, sin "@" ni "/")
+db_username = "admincollege"
+db_password = "TU_PASSWORD_SEGURO_AQUI"
+
+# Clave JWT (mínimo 32 caracteres)
+jwt_key = "TU_CLAVE_JWT_SECRETA_MINIMO_32_CHARS"
+
+# Ruta al zip generado por dotnet lambda package
+# Generar con: cd WebApi && dotnet lambda package
+lambda_zip_path = "../WebApi/bin/Release/net8.0/WebApi.zip"
