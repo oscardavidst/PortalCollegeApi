@@ -103,6 +103,15 @@ resource "aws_security_group" "rds" {
     description     = "SQL Server solo desde Lambda"
   }
 
+  # REGLA: Permite la conexión desde tu PC local
+  ingress {
+    from_port   = 1433
+    to_port     = 1433
+    protocol    = "tcp"
+    cidr_blocks = ["190.145.240.14/32"] # Ejemplo: "190.158.20.45/32" (puedes buscar "Cual es mi IP" en Google)
+    description = "Acceso local para migraciones desde PC"
+  }
+
   tags = {
     Name = "${var.project_name}-rds-sg"
   }
